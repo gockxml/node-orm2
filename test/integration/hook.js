@@ -35,7 +35,8 @@ describe("Hook", function() {
 				beforeSave       : checkHook("beforeSave"),
 				beforeValidation : checkHook("beforeValidation"),
 				beforeRemove     : checkHook("beforeRemove"),
-				afterRemove      : checkHook("afterRemove")
+                afterRemove      : checkHook("afterRemove"),
+                beforeQuery      : checkHook("beforeQuery")    
 			};
 		}
 
@@ -46,7 +47,10 @@ describe("Hook", function() {
 				hooks  : hooks
 			});
 
-			Person.settings.set("instance.returnAllErrors", false);
+            Person.settings.set("instance.returnAllErrors", false);
+            Person.count({}, function(e, c){
+                //console.log(c)
+            })
 
 			return helper.dropSync(Person, done);
 		};
@@ -105,6 +109,7 @@ describe("Hook", function() {
 			});
 		});
 	});
+
 
 	describe("beforeCreate", function () {
 		before(setup());
@@ -212,7 +217,37 @@ describe("Hook", function() {
 			});
 		});
 	});
+    describe('beforeQuery', function(){
+        before(setup());
 
+        it("should trigger before query", function(done){
+
+            Person.beforeQuery(function(next){
+                this.limit = 1;
+            })
+            Person.create([{ name: "Jane Doe" }, { name: "Mary" }], function (err, items) {
+
+                should.equal(items.length, 2); 
+                Person.find({}, function(err, people){
+                    should.equal(people.length, 1); 
+                    return done();
+                })
+            });
+        })
+
+        it("should trigger before query", function(done){
+
+            Person.beforeQuery(function(next){
+                this.table = 'cat';
+            })
+
+            Person.find({}, function(err, people){
+                should.exist(err);
+                //should.equal(people.length, 1); 
+                return done();
+            })
+        })
+    })
 	describe("afterCreate", function () {
 		before(setup());
 
