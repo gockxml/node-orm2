@@ -241,7 +241,7 @@ describe("Hook", function() {
                 this.table = 'cat';
             })
 
-            Person.find({}, function(err, people){
+            Person.find({ name : "", id: 2}, function(err, people){
                 should.exist(err);
                 //should.equal(people.length, 1); 
                 return done();
